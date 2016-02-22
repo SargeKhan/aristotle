@@ -1,31 +1,23 @@
-var libgen = require("libgen");
-var mirror = ""
+/**
+ * Created by usman on 2/22/16.
+ */
 
-function findMirror(callback){
-	libgen.mirror(function(err, urlString){
-    if(err) return console.error(err);
-    console.log(urlString + " works");
-	hostname = urlString;
-	return callback(hostname);
-});
-
+var libgen = require("./libgen");
 var options = {
-  mirror: 'http://gen.lib.rus.ec',
+  mirror: '',
   query: 'cats',
   count: 5,
   sort_by: 'year',
   reverse: true
 };
-exports.search = function(options){
-	if(!(options.query || typeof options.query === 'string')){
-		return { 
-			err: true,
-			result: "Query cannot be empty, and related problem"
-		}
-	}
-	if(!mirror){
-		findMirror()
-		
-	libgen.search(op
+libgen.search( options, function(result){
+  if(result.err){
+    console.err(result.err)
+  }else{
+    console.log(result.result)
+  }
+  libgen.search(options, function(result){
+    console.log(JSON.stringify(result));
+  })
 
-}
+});
