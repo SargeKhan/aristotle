@@ -1,4 +1,10 @@
 var libgen = require("libgen");
+var request = require("request");
+var cheerio = require("cheerio");
+
+var http = require('http');
+var fs = require('fs');
+
 
 var mirror= "";
 function findMirror( options, searchCallback, callback) {
@@ -61,10 +67,39 @@ exports.search = function(options, callback){
 	}
 };
 
+exports.getDownloadLink = function(requestUrl, callback){
+	request(mirror+ "ads.php?md5="+ requestUrl, function (err, response, html) {
+		if(!err && response.statusCode == 200){
+			var $ = cheerio.load(html);
+			$ = $("H2",  "body");
+			href = $.parent().attr("href");
+			return callback({
+				err: false,
+				result: href
+			});
+		}else {
+			return callback({
+				err: true,
+				result: err
+			});
+		}
+	});
+};
 
-/*
-exports.search(options, function(res){
-	console.log("Stuff returned: " + JSON.stringify(res) );
-});
-*/
-
+exports.saveFile = function(filename, fileUrl, callback){
+	var file = fs.createWriteStream(filename);
+	http.get(mirror + fileUrl, function(response) {
+		response.pipe(file);
+		file.on('finish', function() {
+			file.close(
+				callback({
+					err: false,
+					result: "File saved"
+				})
+			)
+		});
+	}).on('error', function(err) {
+		fs.unlink(dest);
+		if (callback) callback(err.message);
+	});
+};
