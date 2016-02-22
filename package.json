@@ -1,0 +1,11 @@
+{
+  "name": "aristotle",
+  "version": "1.0.0",
+  "description": "Popcorn time for readers",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "sargekhan <usmankhen@gmail.com>",
+  "license": "GPL-2.0"
+}
