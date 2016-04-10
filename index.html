@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hello World!</title>
+    <link href="node_modules/angular-material/angular-material.css" rel="stylesheet">
+    <link href="lib/css/index.css" rel="stylesheet">
+</head>
+<body ng-app="BlankApp1" ng-cloak>
+<div ng-controller="AppCtrl" ng-cloak>
+    <md-grid-list
+            md-cols="1" md-cols-sm="2" md-cols-md="3" md-cols-gt-md="6"
+            md-row-height-gt-md="1:1" md-row-height="4:3"
+            md-gutter="8px" md-gutter-gt-sm="4px" >
+        <md-grid-tile  md-ink-ripple ng-click="showAdvanced($event)" ng-repeat="tile in books"
+                      md-rowspan="1"
+                      ng-style="{'background-image':'url({{mirror+'/covers/'+tile.Coverurl}})','background-size': 'cover'}"
+                      md-colspan="1"
+                      md-colspan-sm="1"
+                      md-colspan-xs="1">
+            <md-grid-tile-footer><h3>{{tile.Title}}</h3></md-grid-tile-footer>
+        </md-grid-tile>
+    </md-grid-list>
+</div>
+<script src="node_modules/angular/angular.js"></script>
+<script src="node_modules/angular-aria/angular-aria.js"></script>
+<script src="node_modules/angular-animate/angular-animate.js"></script>
+<script src="node_modules/angular-material/angular-material.js"></script>
+<script src="node_modules/angular-messages/angular-messages.js"></script>
+<script src="lib/js/epub.js"></script>
+<script src="lib/js/zip.min.js"></script>
+<script type="text/ng-template" id="dialog1.tmpl.html">
+    <md-dialog class="md-dialog-fullscreen" aria-label="Mango (Fruit)"  ng-cloak>
+        <form>
+            <md-toolbar>
+                <div class="md-toolbar-tools">
+                    <h2>Mango (Fruit)</h2>
+                    <span flex></span>
+                    <md-button class="md-icon-button" ng-click="cancel()">
+                        <md-icon md-svg-src="img/icons/ic_close_24px.svg" aria-label="Close dialog"></md-icon>
+                    </md-button>
+                </div>
+            </md-toolbar>
+            <md-dialog-content>
+                <div id="hereBook" class="md-dialog-content">
+                </div>
+            </md-dialog-content>
+            <md-dialog-actions layout="row">
+                <md-button href="http://en.wikipedia.org/wiki/Mango" target="_blank" md-autofocus>
+                    More on Wikipedia
+                </md-button>
+                <span flex></span>
+                <md-button ng-click="answer('not useful')">
+                    Not Useful
+                </md-button>
+                <md-button ng-click="answer('useful')" style="margin-right:20px;">
+                    Useful
+                </md-button>
+            </md-dialog-actions>
+        </form>
+    </md-dialog>
+</script>
+<!-- Your application bootstrap  -->
+<script type="text/javascript">
+    function DialogController($scope, $mdDialog) {
+        var Book = ePub("The Second Sex - Beauvoir, Simone de.epub");
+        $scope.hide = function() {
+            $mdDialog.hide();
+        };
+
+        $scope.cancel = function() {
+//            $mdDialog.cancel();
+            Book.nextPage();
+        };
+
+        $scope.answer = function(answer) {
+//            $mdDialog.hide(answer);
+            Book.renderTo("hereBook");
+        };
+    }
+    /**
+     * You must include the dependency on 'ngMaterial'
+     */
+    var libgenio = require("./libgenio");
+    angular.module('BlankApp1', ['ngMaterial','ngMessages'])
+            .controller('AppCtrl', function($scope, $mdDialog, $mdMedia) {
+                $scope.isOpen = false;
+                $scope.status = '  ';
+                $scope.customFullscreen = $mdMedia('xs') || $mdMedia('sm');
+                var options = {
+                    mirror: '',
+                    query: 'The Alchemist',
+                    count: 25,
+                    sort_by: 'year',
+                    reverse: false
+                };
+                $scope.demo = {
+                    isOpen: false,
+                    count: 0,
+                    selectedDirection: 'left'
+                };
+                $scope.showAdvanced = function(ev) {
+                    var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
+
+                    $mdDialog.show({
+                                controller: DialogController,
+                                templateUrl: 'dialog1.tmpl.html',
+                                parent: angular.element(document.body),
+                                targetEvent: ev,
+                                clickOutsideToClose:true,
+                                fullscreen: true
+                            })
+                            .then(function(answer) {
+                                $scope.status = 'You said the information was "' + answer + '".';
+                            }, function() {
+                                $scope.status = 'You cancelled the dialog.';
+                            });
+
+
+
+                    $scope.$watch(function() {
+                        return $mdMedia('xs') || $mdMedia('sm');
+                    }, function(wantsFullScreen) {
+                        $scope.customFullscreen = (wantsFullScreen === true);
+                    });
+
+                };
+                $scope.books = [];
+                libgenio.search(options, function(data){
+                    if(!data.err){
+                        $scope.books = data.result;
+                        $scope.mirror = data.mirror;
+                        $scope.$apply();
+                    }
+                });
+                $scope.mulaction = function(){
+                    console.log('U');
+                    alert('Got clicked')
+                }
+            })
+</script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+</body>
+</html>

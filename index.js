@@ -3,10 +3,11 @@
  */
 
 var libgenio = require("./libgenio");
+var libgen = require("libgen");
 var options = {
   mirror: '',
   query: 'The Alchemist Paulo',
-  count: 5,
+  count: 25,
   sort_by: 'year',
   reverse: true
 };
@@ -22,10 +23,19 @@ libgenio.search( options, function(result){
   })
 });
 */
-libgenio.search(options, function(){});
-
-libgenio.getDownloadLink("83a766ef8183df3f2056654df6230291", function(result){
-  saveFile("/home/usman/Documents/Books/test.jpg", result, function(status){
-
-  });
+//libgenio.search(options, function(data){
+//    console.log(data);
+//});
+libgen.utils.check.canDownload("83a766ef8183df3f2056654df6230291",function(err,url){
+    if (err) {
+        return console.error(err);
+    }
+    else{
+        libgenio.getDownloadLink(url, function(result){
+            console.log('DOWNLOAD LINK'+JSON.stringify(result));
+              libgenio.saveFile("/home/ronniekinsley/Documents/abc.pdf", result.result, function(status){
+                  console.log(status);
+            });
+        });
+    }
 });

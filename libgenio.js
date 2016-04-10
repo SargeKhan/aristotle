@@ -6,7 +6,7 @@ var http = require('http');
 var fs = require('fs');
 
 
-var mirror= "";
+var mirror= "http://gen.lib.rus.ec";
 function findMirror( options, searchCallback, callback) {
 	libgen.mirror(function (err, urlString) {
 		if (err) {
@@ -42,10 +42,11 @@ function searchBook(options, callback){
 				result: err
 			});
 		} else{
-			console.log(data);
+			//console.log(data);
 			callback({
 				err: false,
-				result: data
+				result: data,
+                mirror: options.mirror
 			});
 		}
 	});
@@ -68,7 +69,7 @@ exports.search = function(options, callback){
 };
 
 exports.getDownloadLink = function(requestUrl, callback){
-	request(mirror+ "ads.php?md5="+ requestUrl, function (err, response, html) {
+	request(requestUrl, function (err, response, html) {
 		if(!err && response.statusCode == 200){
 			var $ = cheerio.load(html);
 			$ = $("H2",  "body");
