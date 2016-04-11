@@ -26,16 +26,16 @@ libgenio.search( options, function(result){
 //libgenio.search(options, function(data){
 //    console.log(data);
 //});
-libgen.utils.check.canDownload("83a766ef8183df3f2056654df6230291",function(err,url){
-    if (err) {
-        return console.error(err);
-    }
-    else{
-        libgenio.getDownloadLink(url, function(result){
-            console.log('DOWNLOAD LINK'+JSON.stringify(result));
-              libgenio.saveFile("/home/ronniekinsley/Documents/abc.pdf", result.result, function(status){
-                  console.log(status);
-            });
-        });
-    }
+//libgen.utils.check.canDownload("02390179884E954F7307866EBF718A27",function(err,url){
+//    if (err) {
+//        return console.error(err);
+//    }
+//    else{
+//    }
+//});
+libgenio.getDownloadLink("02390179884e954f7307866ebf718a27", function(result){
+    console.log('DOWNLOAD LINK'+JSON.stringify(result));
+    //  libgenio.saveFile("/home/ronniekinsley/Documents/abc.pdf", result.result, function(status){
+    //      console.log(status);
+    //});
 });
