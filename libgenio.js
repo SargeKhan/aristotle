@@ -112,19 +112,34 @@ exports.getDownloadLink = function(requestUrl, callback){
 };
 
 exports.saveFile = function(filename, fileUrl, callback){
-	var file = fs.createWriteStream(filename);
-	http.get(mirror + fileUrl, function(response) {
-		response.pipe(file);
-		file.on('finish', function() {
-			file.close(
-				callback({
-					err: false,
-					result: "File saved"
-				})
-			)
-		});
-	}).on('error', function(err) {
-		fs.unlink(dest);
-		if (callback) callback(err.message);
-	});
+    //using request since default http lib doesn't follow redirects and fails downloading
+    var r = request(mirror + fileUrl);
+    r.on( 'response', function( res ){
+        // create file write stream
+        var fws = fs.createWriteStream( filename );
+
+        // setup piping
+        res.pipe( fws );
+
+        res.on( 'end', function(){
+            			callback({
+            				err: false,
+            				result: "File saved"
+            			})
+        });
+    });
+	//http.get(mirror + fileUrl, function(response) {
+	//	response.pipe(file);
+	//	file.on('finish', function() {
+	//		file.close(
+	//			callback({
+	//				err: false,
+	//				result: "File saved"
+	//			})
+	//		)
+	//	});
+	//}).on('error', function(err) {
+	//	fs.unlink(filename);
+	//	if (callback) callback(err.message);
+	//});
 };

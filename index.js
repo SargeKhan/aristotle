@@ -31,11 +31,12 @@ libgenio.search( options, function(result){
 //        return console.error(err);
 //    }
 //    else{
+//        console.log(url);
 //    }
 //});
 libgenio.getDownloadLink("02390179884e954f7307866ebf718a27", function(result){
     console.log('DOWNLOAD LINK'+JSON.stringify(result));
-    //  libgenio.saveFile("/home/ronniekinsley/Documents/abc.pdf", result.result, function(status){
-    //      console.log(status);
-    //});
+      libgenio.saveFile("/home/ronniekinsley/Documents/abc.pdf", result.result, function(status){
+          console.log(status);
+    });
 });
