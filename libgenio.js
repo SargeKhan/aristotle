@@ -1,12 +1,14 @@
 var libgen = require("libgen");
 var request = require("request");
 var cheerio = require("cheerio");
+var path = require("path");
 
 var http = require('http');
 var fs = require('fs');
 
 
 var mirror= "";
+
 function findMirror( options, searchCallback, callback) {
 	libgen.mirror(function (err, urlString) {
 		if (err) {
@@ -78,7 +80,7 @@ function scrape(requestUrl,callback){
         if(!err && response.statusCode == 200){
             var $ = cheerio.load(html);
             $ = $("H2",  "body");
-            href = $.parent().attr("href");
+            var href = $.parent().attr("href");
             return callback({
                 err: false,
                 result: href
@@ -92,42 +94,56 @@ function scrape(requestUrl,callback){
     });
 }
 exports.getDownloadLink = function(requestUrl, callback){
+	console.log("Mirror before checking" + mirror);
     if(mirror){
+		console.log("Mirror Link: " + mirror);
         scrape(mirror+"/get.php?md5="+requestUrl,callback);
     }
     else {
+		console.log("Didn't find an exisitng mirror");
         libgen.mirror(function (err, urlString) {
-            if(err){
+            if(err || urlString == undefined){
+
+				console.log("Problemo");
                 return callback({
                     err: true,
                     result: err
                 });
             }
             else{
-                mirror = urlString;
+				console.log("urlString:" + urlString);
+				mirror = urlString;
+				console.log(mirror);
                 scrape(mirror+"/get.php?md5="+requestUrl,callback);
             }
         });
     }
 };
 
-exports.saveFile = function(filename, fileUrl, callback){
-    //using request since default http lib doesn't follow redirects and fails downloading
+exports.saveFile = function(filePath, fileUrl, callback){
+    // using request since default http lib doesn't follow redirects and fails downloading
+	console.log("Mirror" + mirror);
     var r = request(mirror + fileUrl);
     r.on( 'response', function( res ){
-        // create file write stream
+		// RegExp to extract the filename from Content-Disposition
+		var regexp = /filename=\"(.*)\"/gi;
+		// extract filename
+		var filename = regexp.exec( res.headers['content-disposition'] )[1];
+		console.log(path.join(filePath, filename));
+
+		// create file write stream
         var fws = fs.createWriteStream( filename );
 
         // setup piping
         res.pipe( fws );
 
-        res.on( 'end', function(){
-            			callback({
-            				err: false,
-            				result: "File saved"
-            			})
-        });
-    });
+		res.on( 'end', function(){
+			callback({
+				err: false,
+				result: "File saved"
+			})
+		});
+	});
 	//http.get(mirror + fileUrl, function(response) {
 	//	response.pipe(file);
 	//	file.on('finish', function() {
